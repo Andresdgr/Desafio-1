@@ -75,3 +75,15 @@ void imprimirTablero(unsigned char* celdas,int ancho,int alto,int bytesPorFila){
         cout << "|" << endl;
     }
 }
+
+bool filaLlena(unsigned char* celdas,int bytesPorFila,int fila){
+    int inicio = fila * bytesPorFila;
+
+    for (int i = 0; i < bytesPorFila; i++) {
+        if (celdas[inicio + i] != 255) {
+            return false;
+        }
+    }
+
+    return true;
+}

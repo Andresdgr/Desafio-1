@@ -1,49 +1,117 @@
 #include "tablero.h"
+#include <iostream>
+using namespace std;
 
-//  Definición de las variables de dimención
-int ANCHO          = 0;
-int ALTO           = 0;
-int BYTES_POR_FILA = 0;
-int TOTAL_BYTES    = 0;
+void crearTablero(unsigned char*& celdas, int& bytesPorFila, int ancho, int alto) {
+    bytesPorFila = ancho / 8;
 
-void inicializarDimensiones(int ancho, int alto) {
-    ANCHO          = ancho;
-    ALTO           = alto;
-    BYTES_POR_FILA = ancho / 8;
-    TOTAL_BYTES    = alto * BYTES_POR_FILA;
-}
+    int totalBytes = alto * bytesPorFila;
 
+    celdas = new unsigned char[totalBytes];
 
-unsigned char* crearTablero() {
-    return new unsigned char[TOTAL_BYTES](); // Se crea un solo bloque de tamaño TOTAL_BYTES
-}
-
-void liberarTablero(unsigned char* t) {
-    delete[] t;
-}
-
-void copiarTablero(unsigned char* dest, unsigned char* src) {
-    for (int i = 0; i < TOTAL_BYTES; i++)
-        dest[i] = src[i];
-}
-
-void limpiarTablero(unsigned char* t) {
-    for (int i = 0; i < TOTAL_BYTES; i++)
-        t[i] = 0x00;
-}
-
-void imprimirTablero(unsigned char* t, char ocupado, char vacio) {
-    for (int y = 0; y < ALTO; y++) {
-        for (int x = 0; x < ANCHO; x++) {
-            // Calcular índice del byte y posición del bit dentro del byte
-            int byteIndex = (y * BYTES_POR_FILA) + (x / 8);
-            int bitIndex = 7 - (x % 8);  // MSB primero (bit 7 es el primero de izquierda a derecha)
-
-            // Extraer el bit
-            bool activo = (t[byteIndex] >> bitIndex) & 1;
-            cout << (activo ? ocupado : vacio);
-        }
-        cout << endl;
+    for (int i = 0; i < totalBytes; i++) {
+        celdas[i] = 0;
     }
-    cout << endl;
+}
+void destruirTablero(unsigned char*& celdas) {
+    if (celdas != 0) {
+        delete[] celdas;
+        celdas = 0;
+    }
+}
+
+
+bool estaOcupado(unsigned char* celdas,int bytesPorFila,int fila,int columna)
+{
+    int byteEnFila = columna / 8;
+
+    int bitEnByte = columna % 8;
+
+    int indice = fila * bytesPorFila + byteEnFila;
+
+    unsigned char byte = celdas[indice];
+
+    unsigned char mascara = 1 << bitEnByte;
+
+    return (byte & mascara) != 0;
+}
+
+void ocuparCelda(unsigned char* celdas,int bytesPorFila,int fila,int columna)
+{
+    int byteEnFila = columna / 8;
+
+    int bitEnByte = columna % 8;
+
+    int indice = fila * bytesPorFila + byteEnFila;
+
+    unsigned char mascara = 1 << bitEnByte;
+
+    celdas[indice] |= mascara;
+}
+void limpiarCelda(unsigned char* celdas,int bytesPorFila,int fila,int columna)
+{
+    int byteEnFila = columna / 8;
+
+    int bitEnByte = columna % 8;
+
+    int indice = fila * bytesPorFila + byteEnFila;
+
+    unsigned char mascara = 1 << bitEnByte;
+
+    celdas[indice] &= ~mascara;
+}
+void imprimirTablero(unsigned char* celdas,int ancho,int alto,int bytesPorFila){
+    for (int fila = 0; fila < alto; fila++) {
+        cout << "|";
+
+        for (int columna = 0; columna < ancho; columna++) {
+            if (estaOcupado(celdas, bytesPorFila, fila, columna)) {
+                cout << "[]";
+            } else {
+                cout << ". ";
+            }
+        }
+
+        cout << "|" << endl;
+    }
+}
+
+bool filaLlena(unsigned char* celdas,int bytesPorFila,int fila){
+    int inicio = fila * bytesPorFila;
+
+    for (int i = 0; i < bytesPorFila; i++) {
+        if (celdas[inicio + i] != 255) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void eliminarFila(unsigned char* celdas,int bytesPorFila,int fila){
+    for (int f = fila; f > 0; f--) {
+
+        int inicioDestino = f * bytesPorFila;
+        int inicioOrigen = (f - 1) * bytesPorFila;
+
+        for (int i = 0; i < bytesPorFila; i++) {
+            celdas[inicioDestino + i] = celdas[inicioOrigen + i];
+        }
+    }
+
+    for (int i = 0; i < bytesPorFila; i++) {
+        celdas[i] = 0;
+    }
+}
+void limpiarFilasCompletas(unsigned char* celdas,int ancho,int alto,int bytesPorFila)
+{
+    for (int fila = 0; fila < alto; fila++) {
+
+        if (filaLlena(celdas, bytesPorFila, fila)) {
+
+            eliminarFila(celdas, bytesPorFila, fila);
+
+            fila--; // MUY IMPORTANTE
+        }
+    }
 }

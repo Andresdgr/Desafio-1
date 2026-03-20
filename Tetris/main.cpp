@@ -1,44 +1,28 @@
 #include <iostream>
-using namespace std;
-
 #include "tablero.h"
 
-int main() {
-    // 1. Inicializar dimensiones (ej: 16x8)
-    inicializarDimensiones(16, 8);
+using namespace std;
 
-    cout << "Dimensiones: " << ANCHO << "x" << ALTO << endl;
-    cout << "Bytes por fila: " << BYTES_POR_FILA << endl;
-    cout << "Total bytes: " << TOTAL_BYTES << endl << endl;
+int main()
+{
+    int ancho = 16;
+    int alto = 8;
+    int bytesPorFila = 0;
 
-    // 2. Crear tablero
-    unsigned char* tablero = crearTablero();
+    unsigned char* celdas = 0;
 
-    // 3. Dibujar formas de prueba (modificando bits manualmente)
-    // Ejemplo: Pieza L
-    for (int x = 7; x <= 8; x++) {
-        int byteIndex = (3 * BYTES_POR_FILA) + (x / 8);
-        int bitIndex = 7 - (x % 8);
-        tablero[byteIndex] |= (1 << bitIndex); // OR con máscara para encender bit
-    }
+    crearTablero(celdas, bytesPorFila, ancho, alto);
 
-    for (int y = 1; y <= 2; y++) {
-        int byteIndex = (y * BYTES_POR_FILA) + (7 / 8);
-        int bitIndex = 7 - (7 % 8);
-        tablero[byteIndex] |= (1 << bitIndex); // OR con máscara para encender bit
-    }
+    ocuparCelda(celdas, bytesPorFila, 2, 3);
+    ocuparCelda(celdas, bytesPorFila, 2, 4);
+    ocuparCelda(celdas, bytesPorFila, 3, 10);
+    ocuparCelda(celdas, bytesPorFila, 5, 15);
+    ocuparCelda(celdas, bytesPorFila, 7, 15);
 
-    // 4. Mostrar el tablero
-    imprimirTablero(tablero, '#', '.');
+    cout << "Tablero actual:" << endl;
+    imprimirTablero(celdas, ancho, alto, bytesPorFila);
 
-    // 5. Probar limpiar
-    limpiarTablero(tablero);
-    cout << "Tablero limpio:" << endl;
-    imprimirTablero(tablero);
-
-
-    // 6. Liberar memoria
-    liberarTablero(tablero);
+    destruirTablero(celdas);
 
     return 0;
 }

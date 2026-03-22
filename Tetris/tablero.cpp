@@ -3,11 +3,10 @@
 using namespace std;
 
 void crearTablero(unsigned char*& celdas, int& bytesPorFila, int ancho, int alto) {
+
     bytesPorFila = ancho / 8;
-
     int totalBytes = alto * bytesPorFila;
-
-    celdas = new unsigned char[totalBytes];
+    celdas = new unsigned char[totalBytes]; // crea un espacio de memoria en el heap para guardar el tablero
 
     for (int i = 0; i < totalBytes; i++) {
         celdas[i] = 0;
@@ -16,7 +15,7 @@ void crearTablero(unsigned char*& celdas, int& bytesPorFila, int ancho, int alto
 void destruirTablero(unsigned char*& celdas) {
     if (celdas != 0) {
         delete[] celdas;
-        celdas = 0;
+        celdas = nullptr;
     }
 }
 
@@ -103,7 +102,9 @@ void eliminarFila(unsigned char* celdas,int bytesPorFila,int fila){
         celdas[i] = 0;
     }
 }
-void limpiarFilasCompletas(unsigned char* celdas,int ancho,int alto,int bytesPorFila)
+
+
+void limpiarFilasCompletas(unsigned char* celdas,int alto,int bytesPorFila)
 {
     for (int fila = 0; fila < alto; fila++) {
 
@@ -111,7 +112,7 @@ void limpiarFilasCompletas(unsigned char* celdas,int ancho,int alto,int bytesPor
 
             eliminarFila(celdas, bytesPorFila, fila);
 
-            fila--; // MUY IMPORTANTE
+            fila--; // MUY IMPORTANTE por que si vuelvo a verificr si la linea sigue vacia cuando la otra se borre
         }
     }
 }

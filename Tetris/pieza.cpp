@@ -3,6 +3,7 @@
 #include "tablero.h"
 using namespace std;
 
+//unsigned short ocupa 16 bits (2 Bytes) nos ayuda a no desperdiciar memoria
 bool bitPiezaEncendido(unsigned short pieza, int filaInterna, int colInterna)
 {
     int indice = filaInterna * 4 + colInterna;
@@ -101,4 +102,20 @@ unsigned short generarPiezaAleatoria()
     }
 
     return pieza;
+}
+
+void fijarPieza(unsigned char* celdas,int bytesPorFila,unsigned short pieza,int filaPieza,int colPieza)
+{
+    for (int filaInterna = 0; filaInterna < 4; filaInterna++) {
+        for (int colInterna = 0; colInterna < 4; colInterna++) {
+
+            if (bitPiezaEncendido(pieza, filaInterna, colInterna)) {
+
+                int filaReal = filaPieza + filaInterna;
+                int colReal = colPieza + colInterna;
+
+                ocuparCelda(celdas, bytesPorFila, filaReal, colReal);
+            }
+        }
+    }
 }

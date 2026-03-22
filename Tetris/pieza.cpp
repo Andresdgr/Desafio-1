@@ -3,31 +3,13 @@
 #include "tablero.h"
 using namespace std;
 
-//unsigned short ocupa 16 bits (2 Bytes) nos ayuda a no desperdiciar memoria
 bool bitPiezaEncendido(unsigned short pieza, int filaInterna, int colInterna)
 {
     int indice = filaInterna * 4 + colInterna;
+
     unsigned short mascara = 1 << indice;
+
     return (pieza & mascara) != 0;
-}
-
-unsigned short rotarPieza(unsigned short pieza)
-{
-    unsigned short rotada = 0;
-
-    for (int fila = 0; fila < 4; fila++) {
-        for (int columna = 0; columna < 4; columna++) {
-            if (bitPiezaEncendido(pieza, fila, columna)) {
-                int filaNueva = columna;
-                int colNueva = 3 - fila;
-
-                int nuevoIndice = filaNueva * 4 + colNueva;
-                rotada |= (1 << nuevoIndice);
-            }
-        }
-    }
-
-    return rotada;
 }
 
 void imprimirPieza(unsigned short pieza)
@@ -44,8 +26,30 @@ void imprimirPieza(unsigned short pieza)
     }
 }
 
-unsigned short generarPiezaAleatoria()
+unsigned short rotarPieza(unsigned short pieza)
 {
+    unsigned short rotada = 0;
+
+    for (int fila = 0; fila < 4; fila++) {
+        for (int columna = 0; columna < 4; columna++) {
+
+            if (bitPiezaEncendido(pieza, fila, columna)) {
+
+                int filaNueva = columna;
+                int colNueva = 3 - fila;
+
+                int nuevoIndice = filaNueva * 4 + colNueva;
+
+                rotada |= (1 << nuevoIndice);
+            }
+        }
+    }
+
+    return rotada;
+}
+
+
+unsigned short generarPiezaAleatoria(){
     unsigned short pieza = 0;
 
     int tipo = rand() % 7;
@@ -104,6 +108,37 @@ unsigned short generarPiezaAleatoria()
     return pieza;
 }
 
+
+
+bool piezaCabe(unsigned char* celdas,int ancho,int alto,int bytesPorFila,unsigned short pieza,int filaPieza,               int colPieza)
+{
+    for (int filaInterna = 0; filaInterna < 4; filaInterna++) {
+        for (int colInterna = 0; colInterna < 4; colInterna++) {
+
+            if (bitPiezaEncendido(pieza, filaInterna, colInterna)) {
+
+                int filaReal = filaPieza + filaInterna;  // coordenadas de ubicacion real de la ficha en el tablero
+                int colReal = colPieza + colInterna;
+
+                if (filaReal < 0 || filaReal >= alto) {
+                    return false;
+                }
+
+                if (colReal < 0 || colReal >= ancho) {
+                    return false;
+                }
+                // verificamos colision con otras piezas del tablero
+                if (estaOcupado(celdas, bytesPorFila, filaReal, colReal)) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+
 void fijarPieza(unsigned char* celdas,int bytesPorFila,unsigned short pieza,int filaPieza,int colPieza)
 {
     for (int filaInterna = 0; filaInterna < 4; filaInterna++) {
@@ -119,3 +154,7 @@ void fijarPieza(unsigned char* celdas,int bytesPorFila,unsigned short pieza,int 
         }
     }
 }
+
+
+
+
